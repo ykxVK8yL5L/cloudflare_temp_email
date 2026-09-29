@@ -840,10 +840,11 @@ export async function sendWebhook(
 ): Promise<{ success: boolean, message?: string }> {
     // send webhook
     const body = formatWebhookBody(settings.body, formatMap);
+    const method = settings.method.toUpperCase();
     const response = await fetch(settings.url, {
-        method: settings.method,
+        method,
         headers: JSON.parse(settings.headers),
-        body: body
+        body: method === 'GET' || method === 'HEAD' ? undefined : body
     });
     if (!response.ok) {
         console.log("send webhook error", response.status, response.statusText);

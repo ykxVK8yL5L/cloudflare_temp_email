@@ -183,6 +183,12 @@ database_id = "xxx"
 # [ai]
 # binding = "AI"
 
+# Durable email workflow execution (required for Workflow actions and Delay nodes)
+# [[workflows]]
+# name = "email-workflow"
+# binding = "EMAIL_WORKFLOW"
+# class_name = "EmailWorkflow"
+
 # kv config for send email verification code
 # [[kv_namespaces]]
 # binding = "KV"

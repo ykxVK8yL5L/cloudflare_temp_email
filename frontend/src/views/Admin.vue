@@ -31,6 +31,7 @@ import WorkerConfig from './admin/WorkerConfig.vue';
 import IpBlacklistSettings from './admin/IpBlacklistSettings.vue';
 import AiExtractSettings from './admin/AiExtractSettings.vue';
 import RedeemCodes from './admin/RedeemCodes.vue';
+import Workflows from './admin/Workflows.vue';
 
 const {
   adminAuth, showAdminAuth, adminTab, loading,
@@ -198,6 +199,9 @@ onMounted(async () => {
       </n-tab-pane>
       <n-tab-pane name="telegram" :tab="t('telegram')">
         <Telegram />
+      </n-tab-pane>
+      <n-tab-pane name="workflows" :tab="t('workflows')">
+        <Workflows />
       </n-tab-pane>
       <n-tab-pane name="statistics" :tab="t('statistics')">
         <Statistics />

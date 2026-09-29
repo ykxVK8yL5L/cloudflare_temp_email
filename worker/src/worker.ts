@@ -18,6 +18,7 @@ import { email } from './email';
 import { scheduled } from './scheduled';
 import { getPasswords, getBooleanValue, getDomains, checkIsAdmin, getEnvStringList } from './utils';
 import { checkAccessControl } from './ip_blacklist';
+export { EmailWorkflow } from './workflow/entrypoint';
 
 const API_PATHS = [
 	"/api/",

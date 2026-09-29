@@ -25,6 +25,7 @@ type Bindings = {
     SEND_MAIL: SendEmail
     ASSETS: Fetcher
     AI: Ai
+    EMAIL_WORKFLOW?: Workflow<import('./workflow/types').WorkflowParams>
 
     // config
     DEFAULT_LANG: string | undefined

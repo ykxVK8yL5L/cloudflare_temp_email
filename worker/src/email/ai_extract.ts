@@ -148,7 +148,7 @@ async function extractWithCloudflareAI(
  * @param message_id - The email message ID
  * @param result - The extraction result to persist
  */
-async function saveExtractMetadata(
+export async function saveExtractMetadata(
     env: Bindings,
     message_id: string | null,
     result: ExtractResult
@@ -259,11 +259,13 @@ export async function extractEmailInfo(
     parsedEmailContext: ParsedEmailContext,
     env: Bindings,
     message_id: string | null,
-    address: string
+    address: string,
+    force: boolean = false,
+    contentOverride?: string,
 ): Promise<ExtractResult | null> {
     try {
         // Check if extraction is enabled via environment variable
-        if (!getBooleanValue(env.ENABLE_AI_EMAIL_EXTRACT)) {
+        if (!force && !getBooleanValue(env.ENABLE_AI_EMAIL_EXTRACT)) {
             return null;
         }
 
@@ -280,10 +282,12 @@ export async function extractEmailInfo(
 
         // Parse email to get content (shared by both modes)
         const parsedEmail = await commonParseMail(parsedEmailContext);
-        const emailContent = getEmailContentForExtract(parsedEmail);
+        const emailContent = contentOverride ?? getEmailContentForExtract(parsedEmail);
 
         const runLocalExtract = async () => {
-            const localContent = joinSubjectAndBody(parsedEmail?.subject, emailContent);
+            const localContent = contentOverride === undefined
+                ? joinSubjectAndBody(parsedEmail?.subject, emailContent)
+                : contentOverride;
             const code = localContent ? extractCode(localContent) : null;
             if (!code) return null;
             const result: ExtractResult = { type: 'auth_code', result: code, result_text: '' };

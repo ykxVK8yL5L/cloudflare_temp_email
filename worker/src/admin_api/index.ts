@@ -19,6 +19,7 @@ import ip_blacklist_settings from './ip_blacklist_settings'
 import ai_extract_settings from './ai_extract_settings'
 import config_api from './config_api'
 import redeem_code_api from '../redeem_api/admin_redeem_code_api'
+import workflow_api from './workflow_api'
 
 export const api = new Hono<HonoCustomType>()
 
@@ -117,3 +118,15 @@ api.post('/admin/ip_blacklist/settings', ip_blacklist_settings.saveIpBlacklistSe
 // AI extract settings
 api.get('/admin/ai_extract/settings', ai_extract_settings.getAiExtractSettings)
 api.post('/admin/ai_extract/settings', ai_extract_settings.saveAiExtractSettings)
+
+// email workflows
+api.get('/admin/workflows', workflow_api.list)
+api.post('/admin/workflows', workflow_api.create)
+api.get('/admin/workflows/runs', workflow_api.runs)
+api.delete('/admin/workflows/runs', workflow_api.removeRuns)
+api.get('/admin/workflows/runs/:run_id', workflow_api.runDetail)
+api.delete('/admin/workflows/runs/:run_id', workflow_api.removeRun)
+api.get('/admin/workflows/:id', workflow_api.get)
+api.put('/admin/workflows/:id', workflow_api.update)
+api.delete('/admin/workflows/:id', workflow_api.remove)
+api.post('/admin/workflows/:id/test', workflow_api.test)

@@ -12,6 +12,7 @@ import { forwardEmail } from "./forward";
 import { EmailRuleSettings } from "../models";
 import { CONSTANTS } from "../constants";
 import { storeRawMail } from "./storage";
+import { prepareEmailWorkflows, startPendingWorkflows } from "../workflow/engine";
 
 
 async function email(message: ForwardableEmailMessage, env: Bindings, ctx: ExecutionContext) {
@@ -64,6 +65,11 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         console.error("remove attachment error", error);
     }
 
+    // Workflow actions that need the live SMTP message (reject, forward, reply)
+    // must run before the message handler returns. Durable actions start after storage.
+    const workflowResult = await prepareEmailWorkflows(message, env, parsedEmailContext.rawEmail);
+    if (workflowResult.rejected) return;
+
     const message_id = message.headers.get("Message-ID");
     // save email
     const storedMailId = await storeRawMail(
@@ -78,6 +84,16 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         console.error("save email error", error);
         return undefined;
     });
+
+    if (storedMailId) {
+        await startPendingWorkflows(env, Number(storedMailId), workflowResult.runIds, workflowResult.pending);
+    } else if (workflowResult.pending.length) {
+        await Promise.all(workflowResult.pending.map(item => env.DB.prepare(
+            `UPDATE workflow_runs SET status='failed',finished_at=datetime('now'),error='Mail storage failed' WHERE id=?`
+        ).bind(item.runId).run()));
+    }
+
+    if (workflowResult.skipDefaultActions) return;
 
     // forward email
     await forwardEmail(message, env);
