@@ -29,6 +29,8 @@ Forward, automatic reply, and reject actions depend on the live SMTP session and
 
 Every Switch case and its default must connect to a next node. Case order defines match priority; when several cases match, only the first one runs.
 
+Regular processing and action nodes accept only one incoming edge. A stop node may be shared by multiple condition or Switch branches, allowing several paths to converge when ending the workflow.
+
 ## Execution and retries
 
 Enabled workflows run from highest to lowest priority. External actions retry twice by default, configurable from zero to five retries per node. Delays can last up to 30 days. Runs and node outputs are stored in D1 and shown in the Admin console.

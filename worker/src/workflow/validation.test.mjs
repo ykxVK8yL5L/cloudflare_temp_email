@@ -21,6 +21,20 @@ test('validates a branching acyclic graph', () => {
     assert.equal(result.valid, true);
 });
 
+test('allows multiple branches to share one stop node only', () => {
+    const sharedStop = validateWorkflowDefinition(definition(
+        [{ id: 'filter', type: 'condition.filter', config: { field: 'subject', operator: 'contains', value: 'code' } }, { id: 'stop', type: 'action.stop' }],
+        [{ id: 'a', source: 'trigger', target: 'filter' }, { id: 'b', source: 'filter', target: 'stop', sourceHandle: 'true' }, { id: 'c', source: 'filter', target: 'stop', sourceHandle: 'false' }],
+    ));
+    assert.equal(sharedStop.valid, true);
+
+    const sharedAction = definition(
+        [{ id: 'filter', type: 'condition.filter', config: { field: 'subject', operator: 'contains', value: 'code' } }, { id: 'hook', type: 'action.webhook', config: { url: 'https://example.com', method: 'POST', headers: '{}' } }, { id: 'stop', type: 'action.stop' }],
+        [{ id: 'a', source: 'trigger', target: 'filter' }, { id: 'b', source: 'filter', target: 'hook', sourceHandle: 'true' }, { id: 'c', source: 'filter', target: 'hook', sourceHandle: 'false' }, { id: 'd', source: 'hook', target: 'stop' }],
+    );
+    assert.match(validateWorkflowDefinition(sharedAction).errors.join(' '), /only one incoming edge/);
+});
+
 test('rejects cycles and unreachable nodes', () => {
     const result = validateWorkflowDefinition(definition(
         [{ id: 'a', type: 'action.stop' }, { id: 'orphan', type: 'action.stop' }],

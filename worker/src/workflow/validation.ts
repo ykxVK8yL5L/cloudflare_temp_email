@@ -140,7 +140,10 @@ export function validateWorkflowDefinition(value: unknown, hasDurableBinding = t
             }
         }
     }
-    for (const [nodeId, count] of incoming) if (count > 1) errors.push(`Node ${nodeId} supports only one incoming edge`);
+    for (const [nodeId, count] of incoming) {
+        const node = definition.nodes.find(item => item.id === nodeId);
+        if (count > 1 && node?.type !== 'action.stop') errors.push(`Node ${nodeId} supports only one incoming edge`);
+    }
     if (triggers[0] && (incoming.get(triggers[0].id) || 0) > 0) errors.push('The trigger cannot have incoming edges');
 
     const visiting = new Set<string>();
